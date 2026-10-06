@@ -77,7 +77,7 @@ def _download(url: str, destination: Path):
             output.write(chunk)
 
 
-def download_and_install_update(info: UpdateInfo):
+def download_and_prepare_update(info: UpdateInfo):
     if not info.download_url:
         raise RuntimeError('Release terbaru tidak memiliki EXE.')
     if os.name != 'nt' or not getattr(sys, 'frozen', False):
@@ -109,4 +109,3 @@ def download_and_install_update(info: UpdateInfo):
     )
 
     subprocess.Popen(['cmd.exe', '/c', str(updater)], cwd=str(temp_dir))
-    sys.exit(0)
