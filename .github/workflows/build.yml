@@ -26,7 +26,14 @@ jobs:
         run: pytest -q
 
       - name: Build EXE
-        run: pyinstaller --noconfirm --clean --windowed --onefile --name "Ditasha-FiveM-Sorting" app.py
+        run: >
+          pyinstaller --noconfirm --clean --windowed --onefile
+          --name "Ditasha-FiveM-Sorting"
+          --collect-all szio
+          --collect-all pymateria
+          --collect-all pyopengltk
+          --collect-all OpenGL
+          app.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
