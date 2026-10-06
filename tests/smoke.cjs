@@ -4,6 +4,8 @@ const root=fs.mkdtempSync(path.join(os.tmpdir(),'ditasha-smoke-'));
 app.setPath('userData',path.join(root,'profile'));
 // Test runtime forbids the POSIX singleton socket; production lock stays intact.
 app.requestSingleInstanceLock=()=>true;
+app.commandLine.appendSwitch('use-angle','swiftshader');
+app.commandLine.appendSwitch('enable-unsafe-swiftshader');
 const output=path.join(root,'export.zip');
 dialog.showSaveDialog=async()=>({canceled:false,filePath:output});
 const errors=[];
