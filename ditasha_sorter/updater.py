@@ -77,7 +77,7 @@ def _download(url: str, destination: Path):
             output.write(chunk)
 
 
-def download_and_prepare_update(info: UpdateInfo):
+def download_and_install_update(info: UpdateInfo):
     if not info.download_url:
         raise RuntimeError('Release terbaru tidak memiliki EXE.')
     if os.name != 'nt' or not getattr(sys, 'frozen', False):
@@ -87,6 +87,7 @@ def download_and_prepare_update(info: UpdateInfo):
     temp_dir = Path(tempfile.mkdtemp(prefix='ditasha_update_'))
     downloaded_exe = temp_dir / EXPECTED_ASSET
     updater = temp_dir / 'Ditasha-Apply-Update.cmd'
+    current_pid = os.getpid()
 
     _download(info.download_url, downloaded_exe)
     if not downloaded_exe.exists() or downloaded_exe.stat().st_size < 1024:
@@ -95,11 +96,13 @@ def download_and_prepare_update(info: UpdateInfo):
     updater.write_text(
         '@echo off\n'
         'title Ditasha FiveM Sorting Updater\n'
-        'echo Installing update...\n'
-        'timeout /t 3 /nobreak >nul\n'
-        f'copy /Y "{downloaded_exe}" "{current_exe}"\n'
+        'echo Menutup versi lama...\n'
+        f'taskkill /PID {current_pid} /T >nul 2>&1\n'
+        'timeout /t 2 /nobreak >nul\n'
+        'echo Memasang versi baru...\n'
+        f'copy /Y "{downloaded_exe}" "{current_exe}" >nul\n'
         'if errorlevel 1 (\n'
-        '  echo Update gagal. Pastikan aplikasi sudah tertutup dan jalankan sebagai Administrator bila diperlukan.\n'
+        '  echo Update gagal. Jalankan aplikasi dari folder yang bisa ditulis, atau jalankan sebagai Administrator.\n'
         '  pause\n'
         '  exit /b 1\n'
         ')\n'
