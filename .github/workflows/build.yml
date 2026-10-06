@@ -1,10 +1,9 @@
-name: Build Windows EXE
+name: Build & Release Windows EXE
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    tags: ['v*']
 
 permissions:
   contents: write
@@ -13,9 +12,13 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -24,6 +27,19 @@ jobs:
 
       - name: Run tests
         run: pytest -q
+
+      - name: Read application version
+        id: version
+        shell: pwsh
+        run: |
+          $content = Get-Content "ditasha_sorter/__init__.py" -Raw
+          if ($content -notmatch "__version__\s*=\s*['\"]([^'\"]+)['\"]") {
+            throw "Could not read __version__ from ditasha_sorter/__init__.py"
+          }
+          $version = $Matches[1]
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Building Ditasha FiveM Sorting v$version"
 
       - name: Build EXE
         run: >
@@ -35,15 +51,38 @@ jobs:
           --collect-all OpenGL
           app.py
 
-      - name: Upload artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ditasha-FiveM-Sorting-Windows
+          name: Ditasha-FiveM-Sorting-Windows-v${{ steps.version.outputs.version }}
           path: dist/Ditasha-FiveM-Sorting.exe
 
-      - name: Publish GitHub Release for tags
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/Ditasha-FiveM-Sorting.exe
-          generate_release_notes: true
+      - name: Create version tag when missing
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          git fetch --tags --force
+          $existing = git tag --list $tag
+          if (-not $existing) {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a $tag -m "Ditasha FiveM Sorting ${{ steps.version.outputs.version }}"
+            git push origin $tag
+            Write-Host "Created tag $tag"
+          } else {
+            Write-Host "Tag $tag already exists"
+          }
+
+      - name: Create GitHub Release when missing
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag "dist/Ditasha-FiveM-Sorting.exe" --title "Ditasha FiveM Sorting $tag" --generate-notes
+            Write-Host "Published release $tag"
+          } else {
+            Write-Host "Release $tag already exists; leaving published asset unchanged."
+          }
