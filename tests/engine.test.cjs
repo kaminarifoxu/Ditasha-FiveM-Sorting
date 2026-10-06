@@ -1,0 +1,32 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),zlib=require('node:zlib');
+const ctx={TextEncoder,TextDecoder,Uint8Array,DataView,Set,Map,console};vm.createContext(ctx);
+for(const f of ['fflate.js','ymt-schema.js','engine.js'])vm.runInContext(fs.readFileSync('ui/'+f,'utf8'),ctx);
+const E=ctx.AssetEngine;
+let id=0;const fixture=(name,extra={})=>({id:++id,name,path:name,parsed:E.parseName(name),category:E.classify(name),bytes:new Uint8Array([82,83,67,55,2,0,0,0,0,0,0,0,0,0,0,0]),...extra});
+const base=[fixture('hair_000_u.ydd'),fixture('hair_diff_000_a_uni.ytd'),fixture('hair_diff_000_b_whi.ytd'),fixture('jbib_000_r.ydd'),fixture('jbib_diff_000_a_uni.ytd')];
+const cfg={name:'test_pack',mode:'addon',gender:'mp_m_freemode_01'};
+let p=E.plan(base,cfg);assert.equal(p.issues.filter(x=>x.severity==='error').length,0);assert.equal(p.groups.length,1);
+const binary=E.binaryYmt(p.groups[0]);assert.equal(Buffer.from(binary.slice(0,4)).toString(),'RSC7');
+const raw=zlib.inflateRawSync(binary.slice(16)),v=new DataView(raw.buffer,raw.byteOffset,raw.byteLength);
+assert.equal(raw.length,8192*(2**(new DataView(binary.buffer).getUint32(8,true)&15)));
+assert.equal(v.getUint32(16,true),0x50524430);assert.equal(v.getUint32(28,true),1);
+const ptr=o=>Number(v.getBigUint64(o,true))-0x50000000;
+const table=ptr(48),num=v.getUint16(76,true);
+function block(id){assert.ok(id>0&&id<=num);const o=table+(id-1)*16;return{hash:v.getUint32(o,true),size:v.getUint32(o+4,true),offset:ptr(o+8)};}
+const root=block(1);assert.equal(root.hash,376833625);assert.equal(raw[root.offset+4+2],0);assert.equal(raw[root.offset+4+11],1);assert.equal(raw[root.offset+4+1],255);
+function array(o,expectedSize){const id=v.getUint32(o,true)&4095,offs=v.getUint32(o,true)>>>12,count=v.getUint16(o+8,true);assert.equal(count,v.getUint16(o+10,true));const b=block(id);assert.ok(offs+count*expectedSize<=b.size);return{offset:b.offset+offs,count};}
+const comps=array(root.offset+16,24);assert.equal(comps.count,2);assert.equal(raw[comps.offset],2);
+const draws=array(comps.offset+8,48);assert.equal(draws.count,1);assert.equal(raw[draws.offset],1);
+const tex=array(draws.offset+8,3);assert.equal(tex.count,2);assert.equal(raw[tex.offset],0);assert.equal(raw[tex.offset+3],1);assert.equal(raw[tex.offset+1],255);
+const jbib=array(comps.offset+24+8,48);assert.equal(raw[jbib.offset],17);
+const infos=array(root.offset+48,48);assert.equal(infos.count,2);assert.equal(raw[infos.offset+44],2);assert.equal(raw[infos.offset+48+44],11);
+const zip=ctx.fflate.unzipSync(E.output(p));assert.ok(zip['test_pack/fxmanifest.lua']);assert.ok(zip['test_pack/stream/metadata/MP_CreatureMetadata_mp_m_freemode_01_test_pack.ymt']);assert.ok(zip['test_pack/data/mp_m_freemode_01_test_pack_shop.meta']);assert.ok(new TextDecoder().decode(zip['test_pack/fxmanifest.lua']).includes('SHOP_PED_APPAREL_META_FILE'));
+const replace=E.plan(base,{...cfg,mode:'preserve'});assert.equal(replace.groups.length,0);assert.ok(replace.files.some(f=>f.path.endsWith('/hair_000_u.ydd')));assert.ok(!replace.manifest.includes('SHOP_PED_APPAREL_META_FILE'));
+assert.ok(E.plan([...base,fixture('hair_000_u.ydd')],cfg).issues.some(i=>i.severity==='error'&&i.message.includes('bentrok')));
+assert.ok(E.plan([fixture('hair_057_u.ydd'),fixture('hair_diff_057_a_uni.ytd')],cfg).issues.some(i=>i.severity==='error'&&i.message.includes('berurutan')));
+assert.ok(E.plan([fixture('hair_000_u.ydd')],cfg).issues.some(i=>i.severity==='error'&&i.message.includes('belum memiliki tekstur')));
+assert.throws(()=>E.output(E.plan([fixture('hair_057_u.ydd')],cfg)),/temuan/);
+const multi=[...base.map(f=>fixture('mp_m_freemode_01_alpha^'+f.name)),...base.map(f=>fixture('mp_m_freemode_01_beta^'+f.name)),...base.map(f=>fixture('mp_f_freemode_01_alpha^'+f.name))];
+p=E.plan(multi,cfg);assert.equal(p.issues.filter(i=>i.severity==='error').length,0);assert.equal(new Set(p.groups.map(g=>g.name)).size,3);assert.equal(new Set(p.files.map(f=>f.path)).size,p.files.length);
+const ped=E.plan([fixture('custom.ydd'),fixture('custom.yft')],{...cfg,mode:'preserve'});assert.ok(ped.issues.some(i=>i.message.includes('peds.meta')));assert.ok(ped.issues.some(i=>i.message.includes('YMT ped')));
+console.log('PASS: classification, preserve mode, multi-collection naming, ZIP resource, RSC7 page/header and nested metadata arrays, slot/texture/mask values, duplicate/gap/orphan/ped failure cases.');

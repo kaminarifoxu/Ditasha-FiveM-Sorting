@@ -1,98 +1,45 @@
-# Ditasha FiveM Sorting
+# DITASHA Asset Sorter — Windows
 
-Desktop utility untuk merapikan asset FiveM dan membuat resource yang siap dipasang ke server.
+Aplikasi portable Windows 10/11 64-bit untuk menyortir aset FiveM dan mengekspor resource. Buka **DITASHA-Asset-Sorter.exe** langsung; tidak perlu Node.js, browser terpisah, login, atau pemasangan. Pembukaan pertama perlu waktu untuk mengekstrak runtime ke folder sementara. Aplikasi tidak membutuhkan hak administrator. Unduhan resmi: https://github.com/kaminarifoxu/Ditasha-FiveM-Sorting/releases/latest.
 
-## Fitur v0.3.0
+## Penggunaan
 
-- Scan folder FiveM secara rekursif.
-- Sorting ped, hair, dan clothing ke resource terpisah.
-- Kategori clothing: tops, pants, shoes, masks, hats, glasses, ears, watches, bracelets, accessories, undershirts, metadata, dan other.
-- Mode **Copy** atau **Move**.
-- Duplicate identik dilewati dan conflict diamankan.
-- Membuat `fxmanifest.lua`, `sort-report.json`, dan `conflicts.json` otomatis.
-- Asset browser YDD dengan pencarian.
-- Pairing otomatis **1 YDD → banyak YTD** berdasarkan component/index FiveM.
-- Dropdown texture variant sehingga tidak perlu mencari YTD manual.
-- **3D Preview YDD/YTD langsung di aplikasi** pada Windows.
-- Drag mouse untuk rotate, scroll untuk zoom, dan tombol Reset View.
-- Mengganti dropdown YTD langsung reload texture model.
-- Auto-check update dari GitHub Releases.
-- Download, install, lalu buka ulang EXE terbaru otomatis.
-- GitHub Actions build Windows EXE dan publish release saat tag `v*` dibuat.
+1. Pilih file/ZIP, pilih folder, atau tarik aset ke area impor. Batas total 25 GiB (25 × 1024³ byte), 50.000 file. File dibaca bertahap.
+2. Periksa kategori dan temuan. Mode Pertahankan memakai nama dan metadata bawaan; Add-on freemode membuat YMT biner RSC7 dan shop META. Ped kustom memerlukan YMT dan peds.meta asli.
+3. Klik nama YDD atau Preview 3D. Pilih drawable, LOD, file YTD pasangan, dan gambar tekstur di dalam YTD. Mendukung GTA V Legacy, DXT1/3/5 dan RGBA. Preview statis, tanpa animasi/rig/cloth; maks. 128 MiB per file.
+4. Klik Unduh resource ZIP dan pilih lokasi penyimpanan. Hasil berisi fxmanifest.lua, stream per kategori/item, metadata, README dan laporan.
+5. Ekspor sebelum menutup: sesi impor tidak tersimpan. Aplikasi meminta konfirmasi jika sesi masih berisi aset. Pembatalan ekspor menghapus file sementara dan mempertahankan ZIP lama.
 
-## Struktur hasil
+Aset diproses lokal, tidak diunggah. Seluruh runtime dan library 3D ada dalam aplikasi. Tautan dokumentasi hanya membutuhkan internet jika dibuka. Sediakan ruang disk untuk ZIP keluaran; ukuran dapat sedikit lebih besar dari total aset. YMT baru dan resource keluaran tetap harus diuji di server FiveM.
 
-```text
-Ditasha_Sorted/
-├─ [ditasha_peds]/
-│  ├─ fxmanifest.lua
-│  └─ stream/
-├─ [ditasha_hair]/
-│  ├─ fxmanifest.lua
-│  └─ stream/
-├─ [ditasha_clothes]/
-│  ├─ fxmanifest.lua
-│  └─ stream/
-│     ├─ tops/
-│     ├─ pants/
-│     ├─ shoes/
-│     ├─ masks/
-│     ├─ hats/
-│     └─ ...
-├─ [ditasha_misc]/
-└─ [ditasha_unsorted]/
+## Beberapa YDD sekaligus
+
+Pada Preview 3D, centang model dalam daftar lalu klik Buka model terpilih. Maksimal 4 YDD, gabungan 2 juta vertex / 512 MiB resource, dan tekstur GPU 128 MiB. Pilih Tumpuk untuk melihat kombinasi komponen atau Jajarkan untuk membandingkan model. Dropdown Model aktif untuk tekstur mengubah YTD, drawable dan LOD khusus model itu; model lain tetap terlihat. Ini mesh statis dengan posisi vertex asli, bukan perakitan karakter memakai rig.
+
+## Update otomatis
+
+Aplikasi memeriksa GitHub Releases ketika dibuka dan setiap 30 menit. Unduh otomatis aktif secara bawaan dan dapat dimatikan lewat tombol Update. Unduhan ditulis bertahap dan diverifikasi SHA-256. Setelah siap, klik Pasang & mulai ulang; sesi impor perlu diekspor terlebih dahulu. EXE lama diganti oleh helper Windows setelah runtime portable ditutup. Helper memulihkan EXE sebelumnya jika aplikasi baru gagal mengonfirmasi startup. Internet hanya diperlukan untuk update dan tautan dokumentasi.
+
+Versi 1.3.0 yang dibagikan sebelumnya belum memiliki updater: unduh versi 1.4.0 ini sekali secara manual. Versi berikutnya bisa diunduh dari aplikasi.
+
+## Merilis versi berikutnya di GitHub
+
+Naikkan nomor `version` di package.json dan package-lock.json, lalu push perubahan ke main. GitHub Actions menjalankan tes, membangun portable Windows, menghasilkan checksum, dan menerbitkan release vX.Y.Z beserta EXE. Rilis yang sudah ada dipertahankan; setiap versi baru perlu nomor lebih tinggi. EXE disimpan di Releases, bukan file source Git karena ukurannya melebihi batas file biasa GitHub.
+
+## Membangun dari kode sumber
+
+Gunakan Node.js 22 atau lebih baru di Windows:
+
+```sh
+npm ci
+npm test
+npm run build:win
 ```
 
-Folder hasil bisa dicopy ke folder `resources` server.
+Hasil: `release/DITASHA-Asset-Sorter.exe`. Versi Electron dan electron-builder dikunci di package-lock.json. `npm start` membuka versi pengembangan.
 
-```cfg
-ensure [ditasha_peds]
-ensure [ditasha_hair]
-ensure [ditasha_clothes]
-```
+Paket portable memakai Electron 44.5.1 dan electron-builder 26.15.3. Copyright © 2026 Ditasha-Workshop. Kode proyek tidak diberi lisensi distribusi bebas; lisensi dependensi tercantum dalam `ui/THIRD_PARTY_NOTICES.txt` dan runtime Chromium/Electron.
 
-## 3D Preview
+## Validasi dan keterbatasan
 
-Preview native `.ydd/.ytd` memakai **szio + PyMateria** untuk membaca resource GTA V dan OpenGL untuk menampilkannya di aplikasi.
-
-1. Pilih Source folder.
-2. Buka tab **Preview 3D**.
-3. Klik **Load Assets**.
-4. Pilih YDD.
-5. Semua YTD yang cocok muncul di dropdown **Texture Variant**.
-6. Pilih variant lain untuk langsung reload texture.
-7. Drag untuk rotate dan scroll untuk zoom.
-
-Jika sebuah YDD tidak punya YTD pasangan, model tetap dicoba dibuka tanpa external texture.
-
-## Menjalankan dari source
-
-Windows direkomendasikan untuk native preview.
-
-```bash
-python -m pip install -r requirements.txt
-python app.py
-```
-
-## Build EXE Windows
-
-```bat
-build.bat
-```
-
-Hasil:
-
-```text
-dist/Ditasha-FiveM-Sorting.exe
-```
-
-## Release & Auto Update
-
-Aplikasi mengecek **latest GitHub Release**, bukan commit `main`. Untuk menerbitkan versi yang bisa didownload updater:
-
-```bash
-git tag v0.3.0
-git push origin v0.3.0
-```
-
-GitHub Actions akan build `Ditasha-FiveM-Sorting.exe` dan memasukkannya ke Release. Pengguna versi lama kemudian akan mendapatkan notifikasi update otomatis.
+Pengujian engine, streaming ZIP64 dan parser model/tekstur lolos. Pengujian desktop mencakup penulisan ZIP bertahap, commit dan pembatalan, penjagaan origin/IPC, serta bridge renderer. Struktur PE x64 dan isi app.asar paket diperiksa. Pengujian UI Electron di Linux headless terhalang pembatasan runtime. GitHub Actions menjalankan smoke test UI pada runner Windows; hasil terakhir dapat dilihat di Actions. Ekspor 25 GiB penuh dan render WebGL belum diuji pada perangkat nyata. Executable belum ditandatangani dengan sertifikat penerbit.

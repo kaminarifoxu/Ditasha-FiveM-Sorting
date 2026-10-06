@@ -1,0 +1,1 @@
+const fs=require('node:fs'),crypto=require('node:crypto');const file='release/DITASHA-Asset-Sorter.exe';fs.writeFileSync(file+'.sha256',crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')+'  DITASHA-Asset-Sorter.exe\n');

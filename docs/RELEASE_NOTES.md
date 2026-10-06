@@ -1,0 +1,5 @@
+- Update otomatis dari GitHub Releases dengan progres unduhan dan verifikasi SHA-256.
+- Tombol Pasang & mulai ulang untuk mengganti EXE portable setelah sesi selesai.
+- Preview hingga 4 YDD bersamaan: tumpuk atau jajarkan, YTD per model.
+- Sorting 25 GB, folder per item, generator fxmanifest/YMT tetap tersedia.
+- Unduh versi ini sekali secara manual jika masih memakai v1.3.0.
