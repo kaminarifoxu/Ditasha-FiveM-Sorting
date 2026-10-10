@@ -1,5 +1,7 @@
-- Preview YDD sekarang terbuka langsung di workspace, di samping daftar aset.
-- Resource Builder otomatis pindah ke bawah saat panel preview 3D digunakan.
-- Setiap YDD bisa dibuka sebagai tab terpisah dan dipindah dengan sekali klik.
-- Hingga 4 YDD dapat dibuka sekaligus, dengan kontrol YTD, drawable, LOD, wireframe, dan kamera tetap tersedia.
-- Sorting hingga 25 GB, folder per item, generator fxmanifest/YMT, updater, dan verifikasi SHA-256 tetap tersedia.
+- Texture Reducer baru untuk YTD dan tekstur embedded di YDD.
+- Preset Safe 2048px, Balanced 1024px, Aggressive 512px, dan Custom.
+- Tekstur oversized diperkecil, mipmap dibuat ulang, dan format DXT1/DXT3/DXT5/BGRA/RGBA/A8/L8 dipertahankan.
+- Tombol Undo mengembalikan file ke versi sebelum optimasi selama sesi masih terbuka.
+- Hasil optimasi menampilkan ukuran sebelum/sesudah dan jumlah tekstur yang diproses.
+- Geometry YDD tidak diubah oleh Texture Reducer.
+- Preview YDD bertab, YTD selector, sorting hingga 25 GB, generator fxmanifest/YMT, updater, dan verifikasi SHA-256 tetap tersedia.
