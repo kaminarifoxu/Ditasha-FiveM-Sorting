@@ -1,7 +1,7 @@
 {
   "name": "ditasha-asset-sorter",
-  "version": "1.4.0",
-  "description": "DITASHA FiveM Asset Sorter \u2014 sorting aset dan preview model 3D",
+  "version": "1.4.1",
+  "description": "DITASHA FiveM Asset Sorter — sorting aset dan preview model 3D",
   "author": "Ditasha-Workshop",
   "license": "UNLICENSED",
   "main": "electron/main.cjs",
@@ -17,7 +17,7 @@
   "build": {
     "appId": "com.ditasha.assetsorter",
     "productName": "DITASHA-Asset-Sorter",
-    "copyright": "Copyright \u00a9 2026 Ditasha-Workshop",
+    "copyright": "Copyright © 2026 Ditasha-Workshop",
     "files": [
       "electron/**/*.cjs",
       "ui/**/*",

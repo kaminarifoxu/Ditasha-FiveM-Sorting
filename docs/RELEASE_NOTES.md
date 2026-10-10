@@ -1,5 +1,5 @@
-- Update otomatis dari GitHub Releases dengan progres unduhan dan verifikasi SHA-256.
-- Tombol Pasang & mulai ulang untuk mengganti EXE portable setelah sesi selesai.
-- Preview hingga 4 YDD bersamaan: tumpuk atau jajarkan, YTD per model.
-- Sorting 25 GB, folder per item, generator fxmanifest/YMT tetap tersedia.
-- Unduh versi ini sekali secara manual jika masih memakai v1.3.0.
+- Preview YDD sekarang terbuka langsung di workspace, di samping daftar aset.
+- Resource Builder otomatis pindah ke bawah saat panel preview 3D digunakan.
+- Setiap YDD bisa dibuka sebagai tab terpisah dan dipindah dengan sekali klik.
+- Hingga 4 YDD dapat dibuka sekaligus, dengan kontrol YTD, drawable, LOD, wireframe, dan kamera tetap tersedia.
+- Sorting hingga 25 GB, folder per item, generator fxmanifest/YMT, updater, dan verifikasi SHA-256 tetap tersedia.
